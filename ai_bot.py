@@ -15,7 +15,7 @@ async def on_ready():
     print(f"ИИ-бот {bot.user} готов!")
 
 @bot.command(name="ии")
-@commands.cooldown(1, 30, commands.BucketType.user)
+@commands.cooldown(1, 5, commands.BucketType.user)
 async def ask_ai(ctx, *, question: str = None):
     if ctx.channel.id != AI_CHANNEL_ID:
         return
