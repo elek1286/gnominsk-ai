@@ -4,10 +4,7 @@ from discord.ext import commands
 import requests
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-AI_CHANNEL_ID = 1524041767580733630  # ← замени на ID канала
-
-# Модель уже выбрана за тебя — проверенная, бесплатная, русскоязычная
-MODEL = "google/gemma-3-27b-it:free"
+AI_CHANNEL_ID = 1524041767580733630  # ← замени на свой ID канала
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -20,16 +17,17 @@ async def on_ready():
 @bot.command(name="ии")
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def ask_ai(ctx, *, question: str = None):
-    """Задаёт вопрос нейросети"""
     if ctx.channel.id != AI_CHANNEL_ID:
         return
     if not question:
-        await ctx.send("Напиши вопрос после `!ии`. Например: `!ии Как дела?`")
+        await ctx.send("Напиши вопрос после `!ии`. Например: `!ии Привет!`")
         return
-    api_key = os.getenv("OPENROUTER_API_KEY")
+
+    api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        await ctx.send("ИИ пока не настроен. Нужен ключ OpenRouter (бесплатно).")
+        await ctx.send("ИИ пока не настроен. Нужен ключ DeepSeek (бесплатно).")
         return
+
     if len(question) > 300:
         await ctx.send("Вопрос слишком длинный. Сократи до 300 символов.")
         return
@@ -41,13 +39,13 @@ async def ask_ai(ctx, *, question: str = None):
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": MODEL,
+                "model": "deepseek-chat",
                 "messages": [{"role": "user", "content": question}],
                 "max_tokens": 200,
                 "temperature": 0.7
             }
             response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
+                "https://api.deepseek.com/v1/chat/completions",
                 headers=headers,
                 json=payload,
                 timeout=15
@@ -55,19 +53,17 @@ async def ask_ai(ctx, *, question: str = None):
             data = response.json()
 
             if "choices" not in data:
-                error_msg = data.get("error", {}).get("message", "Неизвестная ошибка API")
+                error_msg = data.get("error", {}).get("message", "Неизвестная ошибка")
                 await ctx.send(f"Ошибка API: {error_msg}")
                 return
 
             answer = data["choices"][0]["message"]["content"]
             if not answer or not answer.strip():
-                await ctx.send("Нейросеть вернула пустой ответ. Попробуй переформулировать вопрос.")
+                await ctx.send("Нейросеть вернула пустой ответ.")
                 return
-
             if len(answer) > 1000:
                 answer = answer[:1000] + "..."
             await ctx.reply(answer, mention_author=False)
-
         except Exception as e:
             await ctx.send(f"Ошибка: {e}")
 
