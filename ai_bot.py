@@ -41,7 +41,7 @@ async def ask_ai(ctx, *, question: str = None):
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": "meta-llama/llama-3.2-3b-instruct:free",  # бесплатная русскоязычная модель
+                "model": "qwen/qwen-2.5-7b-instruct:free",  # бесплатная русскоязычная модель
                 "messages": [
                     {"role": "user", "content": question}
                 ],
