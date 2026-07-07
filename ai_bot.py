@@ -17,7 +17,7 @@ async def on_ready():
 @bot.command(name="ии")
 @commands.cooldown(1, 30, commands.BucketType.user)  # 1 запрос в 30 секунд на пользователя
 async def ask_ai(ctx, *, question: str = None):
-    """Задаёт вопрос нейросети (бесплатная Mistral 7B)"""
+    """Задаёт вопрос нейросети (бесплатная модель)"""
     if ctx.channel.id != AI_CHANNEL_ID:
         return  # игнорируем команду в других каналах
 
@@ -41,7 +41,7 @@ async def ask_ai(ctx, *, question: str = None):
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": "mistralai/mistral-7b-instruct:free",  # бесплатная модель
+                "model": "google/gemma-3-27b-it:free",  # рабочая бесплатная модель
                 "messages": [
                     {"role": "user", "content": question}
                 ],
