@@ -4,7 +4,10 @@ from discord.ext import commands
 import requests
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-AI_CHANNEL_ID = 1524041767580733630  # ← замени на ID канала, где будет работать команда
+AI_CHANNEL_ID = 1524041767580733630  # ← замени на ID канала
+
+# Модель уже выбрана за тебя — проверенная, бесплатная, русскоязычная
+MODEL = "qwen/qwen-2.5-7b-instruct:free"
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -15,21 +18,18 @@ async def on_ready():
     print(f"ИИ-бот {bot.user} готов!")
 
 @bot.command(name="ии")
-@commands.cooldown(1, 5, commands.BucketType.user)  # 1 запрос в 5 секунд на пользователя
+@commands.cooldown(1, 5, commands.BucketType.user)
 async def ask_ai(ctx, *, question: str = None):
-    """Задаёт вопрос нейросети (бесплатная модель)"""
+    """Задаёт вопрос нейросети"""
     if ctx.channel.id != AI_CHANNEL_ID:
-        return  # игнорируем команду в других каналах
-
+        return
     if not question:
         await ctx.send("Напиши вопрос после `!ии`. Например: `!ии Как дела?`")
         return
-
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         await ctx.send("ИИ пока не настроен. Нужен ключ OpenRouter (бесплатно).")
         return
-
     if len(question) > 300:
         await ctx.send("Вопрос слишком длинный. Сократи до 300 символов.")
         return
@@ -41,10 +41,8 @@ async def ask_ai(ctx, *, question: str = None):
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": "qwen/qwen-2.5-7b-instruct:free",  # бесплатная русскоязычная модель
-                "messages": [
-                    {"role": "user", "content": question}
-                ],
+                "model": MODEL,
+                "messages": [{"role": "user", "content": question}],
                 "max_tokens": 200,
                 "temperature": 0.7
             }
@@ -56,7 +54,6 @@ async def ask_ai(ctx, *, question: str = None):
             )
             data = response.json()
 
-            # Проверяем, вернула ли API ошибку
             if "choices" not in data:
                 error_msg = data.get("error", {}).get("message", "Неизвестная ошибка API")
                 await ctx.send(f"Ошибка API: {error_msg}")
