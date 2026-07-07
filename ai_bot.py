@@ -4,7 +4,10 @@ from discord.ext import commands
 import requests
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-AI_CHANNEL_ID = 1524041767580733630  # ← замени на свой ID канала
+AI_CHANNEL_ID = 1524041767580733630  # ← замени на ID канала
+
+# МОДЕЛЬ: выбери любую бесплатную и впиши сюда
+MODEL = "qwen/qwen-2.5-7b-instruct:free"
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -20,12 +23,12 @@ async def ask_ai(ctx, *, question: str = None):
     if ctx.channel.id != AI_CHANNEL_ID:
         return
     if not question:
-        await ctx.send("Напиши вопрос после `!ии`. Например: `!ии Привет!`")
+        await ctx.send("Напиши вопрос после `!ии`. Например: `!ии Как дела?`")
         return
 
-    api_key = os.getenv("DEEPSEEK_API_KEY")
+    api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        await ctx.send("ИИ пока не настроен. Нужен ключ DeepSeek (бесплатно).")
+        await ctx.send("ИИ пока не настроен. Нужен ключ OpenRouter (бесплатно).")
         return
 
     if len(question) > 300:
@@ -39,13 +42,13 @@ async def ask_ai(ctx, *, question: str = None):
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": "deepseek-chat",
+                "model": MODEL,
                 "messages": [{"role": "user", "content": question}],
                 "max_tokens": 200,
                 "temperature": 0.7
             }
             response = requests.post(
-                "https://api.deepseek.com/v1/chat/completions",
+                "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
                 json=payload,
                 timeout=15
@@ -53,7 +56,7 @@ async def ask_ai(ctx, *, question: str = None):
             data = response.json()
 
             if "choices" not in data:
-                error_msg = data.get("error", {}).get("message", "Неизвестная ошибка")
+                error_msg = data.get("error", {}).get("message", "Неизвестная ошибка API")
                 await ctx.send(f"Ошибка API: {error_msg}")
                 return
 
@@ -61,11 +64,14 @@ async def ask_ai(ctx, *, question: str = None):
             if not answer or not answer.strip():
                 await ctx.send("Нейросеть вернула пустой ответ.")
                 return
+
             if len(answer) > 1000:
                 answer = answer[:1000] + "..."
             await ctx.reply(answer, mention_author=False)
+
         except Exception as e:
             await ctx.send(f"Ошибка: {e}")
 
 if __name__ == "__main__":
     bot.run(TOKEN)
+    
