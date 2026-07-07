@@ -7,7 +7,7 @@ TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 AI_CHANNEL_ID = 1524041767580733630  # ← замени на ID канала
 
 # Модель уже выбрана за тебя — проверенная, бесплатная, русскоязычная
-MODEL = "qwen/qwen-2.5-7b-instruct:free"
+MODEL = "google/gemma-3-27b-it:free"
 
 intents = discord.Intents.default()
 intents.message_content = True
