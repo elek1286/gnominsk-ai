@@ -37,7 +37,7 @@ async def ask_ai(ctx, *, question: str = None):
                 "Content-Type": "application/json"
             }
             payload = {
-               "model": "mistralai/mistral-nemo:free",
+              "model": "tencent/hy3:free",
                 "messages": [
                     {"role": "user", "content": question}
                 ],
