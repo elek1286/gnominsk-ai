@@ -7,7 +7,7 @@ TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 AI_CHANNEL_ID = 1524041767580733630  # ← замени на ID канала
 
 # МОДЕЛЬ: выбери любую бесплатную и впиши сюда
-MODEL = "qwen/qwen-2.5-7b-instruct:free"
+MODEL = "poolside/laguna-xs-2.1:free"
 
 intents = discord.Intents.default()
 intents.message_content = True
